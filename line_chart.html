@@ -1,0 +1,68 @@
+<html>
+<head>
+    <style>
+
+    .line{
+        fill: none;
+        stroke: blue;
+    }
+
+    </style>
+    <script src="d3.js"></script>
+</head>
+
+<body>
+    <svg id="container" height="300" wiidth="500">
+
+        <g id="body" transform="translate(50 50)"></g>
+        <!--g是svg中group标签，transform移动方法，translate是平移，还有rotate等-->
+    </svg>
+
+</body>
+<script>
+    let body = d3.select("#body")  
+    d3.csv("data.csv").then(ShowData)
+
+    function ShowData(data){
+        let bodyHeight = 200
+        let bodyWeight = 400
+
+        data = data.map( d => ({
+            date: new Date(d.date),
+            price: + d.price
+        }) )
+
+        let maxValue = d3.max(data,d => d.price)
+
+        //创建X轴和y轴
+        let yScale = d3.scaleLinear()
+            .range([bodyHeight,0])//数值显示占地面积 squeeze the domain into range
+            .domain([0,maxValue]); //预设scale的范围和大小
+        
+            body.append("g") //将预设的scale显示出来
+            .call(d3.axisLeft(yScale))
+        
+        let xScale=d3.scaleTime()
+            .domain(d3.extent(data,d=> d.date))
+            .range([0,bodyWeight])
+        
+        body.append("g")
+            .attr("transform", "translate(0," + bodyHeight + ")")
+            .call(d3.axisBottom(xScale)
+            .tickFormat(d3.timeFormat("%b")))
+       
+        //把处理好的数据绑定到x轴,y轴
+        valueline = d3.line()
+            .x(d => xScale(d.date))
+            .y(d => yScale(d.price))
+            .defined(d => !!d.price)
+
+        body.append("path")
+            .datum(data)//在画line chart时，必须使用datum
+            .attr("d", d => valueline(d))
+            .attr("class", "line")
+
+
+    }
+</script>
+</html>

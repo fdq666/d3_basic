@@ -1,0 +1,60 @@
+<html>
+<head>
+    <style>
+
+
+    </style>
+    <script src="d3.js"></script>
+</head>
+
+<body>
+    <svg id="container" height="300" wiidth="500">
+
+        <g id="body" transform="translate(50 50)"></g>
+        <!--g是svg中group标签，transform移动方法，translate是平移，还有rotate等-->
+    </svg>
+</body>
+<script>
+    let body = d3.select("#body")  
+    d3.csv("data1.csv").then(ShowData)
+
+    function ShowData(data){
+        let bodyHeight = 200
+        let bodyWeight = 400
+
+        data = data.map( d => ({
+            country: d.country,
+            sales: + d.sales
+        }) )
+   
+
+            
+       
+            let pie = d3.pie()
+        .value(d => d.sales)
+        //console.log(pie(data))
+        
+        let colorScale = d3.scaleOrdinal()
+            .range(d3.schemeCategory10)
+            .domain(data.map(d => d.country))
+        //console.log(colorScale("Japan"))
+
+        let arc = d3.arc()
+            .outerRadius(bodyHeight/2)
+            .innerRadius(0)
+        
+        let g = body.selectAll(".arc")
+            .data(pie(data))
+            .enter()
+            .append("g")
+        g.append("path")
+            .attr("transform", "translate(" + 100 + "," +  100 +")")
+            .attr("d", arc)
+            .attr("fill",d => {
+                return colorScale(d.data.country)
+            })
+
+
+    }
+</script>
+</html>
